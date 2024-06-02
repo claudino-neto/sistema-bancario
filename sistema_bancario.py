@@ -349,6 +349,7 @@ def listar_contas(contas):
     for conta in ContasIterador(contas):
         print("=" * 100)
         print(conta)
+
 def main():
     clientes = list()
     contas = list()
