@@ -1,5 +1,9 @@
 from abc import ABC, abstractmethod
 from datetime import datetime, timezone
+from pathlib import Path
+
+
+ROOT_PATH = Path(__file__).parent
 
 
 class ContasIterador:
@@ -23,6 +27,7 @@ class ContasIterador:
             raise StopIteration
         finally:
             self._index += 1
+
 
 class Conta:
     def __init__(self, numero, cliente):
@@ -101,6 +106,9 @@ class ContaCorrente(Conta):
             C/C:\t{self.numero}
             Titular:\t{self.cliente.nome}
         """
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__}: ('{self.agencia}', '{self.numero}', '{self.cliente.nome}')>"
 
     def sacar(self, valor):
         numero_saques = len([transacao for transacao in self.historico.transacoes if transacao["tipo"] == Saque.__name__])
@@ -217,11 +225,19 @@ class PessoaFisica(Cliente):
         self.data_nascimento = data_nascimento
         super().__init__(**kw)
 
+    def __repr__(self):
+        return f"<{self.__class__.__name__}: ('{self.nome}', '{self.cpf}')>"
+
 
 def log_transacao(func):
     def envelope(*args, **kwargs):
         resultado = func(*args, **kwargs)
-        print(f"{datetime.now()}: {func.__name__.upper()}")
+        data_hora = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        with open(ROOT_PATH / "log.txt", "a") as arquivo:
+            arquivo.write(
+                f"[{data_hora}] Função '{func.__name__}' executada com argumentos {args} e {kwargs}. "
+                f"Retornou {resultado}\n"
+            )
         return resultado
 
     return envelope
@@ -362,6 +378,7 @@ def listar_contas(contas):
     for conta in ContasIterador(contas):
         print("=" * 100)
         print(conta)
+
 
 def main():
     clientes = list()
