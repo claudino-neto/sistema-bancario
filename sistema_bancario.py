@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from datetime import datetime, timezone
 from pathlib import Path
 
-
 ROOT_PATH = Path(__file__).parent
 
 
@@ -33,14 +32,14 @@ class Conta:
     def __init__(self, numero, cliente):
         self._saldo = 0
         self._numero = numero
-        self._agencia = '0001'
+        self._agencia = "0001"
         self._cliente = cliente
         self._historico = Historico()
 
     @property
     def saldo(self):
         return self._saldo
-    
+
     @property
     def numero(self):
         return self._numero
@@ -63,7 +62,9 @@ class Conta:
 
     def sacar(self, valor):
 
-        saldo_insuficiente = valor > self._saldo  # no caso de o valor a ser sacado for maior que o saldo
+        saldo_insuficiente = (
+            valor > self._saldo
+        )  # no caso de o valor a ser sacado for maior que o saldo
 
         saque_negativo = valor < 0
 
@@ -85,12 +86,14 @@ class Conta:
         deposito_negativo = valor < 0
 
         if deposito_negativo:
-            print('Operação falhou! Não é possível realizar depósitos com valores negativos.')
+            print(
+                "Operação falhou! Não é possível realizar depósitos com valores negativos."
+            )
             return False
 
         else:
             self._saldo += valor
-            #self._historico.adicionar_transacao(Deposito(valor))
+            # self._historico.adicionar_transacao(Deposito(valor))
             return True
 
 
@@ -111,9 +114,17 @@ class ContaCorrente(Conta):
         return f"<{self.__class__.__name__}: ('{self.agencia}', '{self.numero}', '{self.cliente.nome}')>"
 
     def sacar(self, valor):
-        numero_saques = len([transacao for transacao in self.historico.transacoes if transacao["tipo"] == Saque.__name__])
+        numero_saques = len(
+            [
+                transacao
+                for transacao in self.historico.transacoes
+                if transacao["tipo"] == Saque.__name__
+            ]
+        )
 
-        excedeu_saques = numero_saques >= self.limite_saques  # no caso de ter realizado o número máximo de saques da conta
+        excedeu_saques = (
+            numero_saques >= self.limite_saques
+        )  # no caso de ter realizado o número máximo de saques da conta
 
         saque_alem_do_limite = valor > self.limite
 
@@ -148,14 +159,19 @@ class Historico:
 
     def gerar_relatorio(self, tipo_transacao=None):
         for transacao in self._transacoes:
-            if tipo_transacao is None or transacao["tipo"].lower() == tipo_transacao.lower():
+            if (
+                tipo_transacao is None
+                or transacao["tipo"].lower() == tipo_transacao.lower()
+            ):
                 yield transacao
 
     def transacoes_do_dia(self):
         data_atual = datetime.now(timezone.utc).date()
         transacoes = []
         for transacao in self._transacoes:
-            data_transacao = datetime.strptime(transacao["data"], "%d-%m-%Y %H:%M:%S").date()
+            data_transacao = datetime.strptime(
+                transacao["data"], "%d-%m-%Y %H:%M:%S"
+            ).date()
             if data_atual == data_transacao:
                 transacoes.append(transacao)
         return transacoes
@@ -244,7 +260,7 @@ def log_transacao(func):
 
 
 def menu():
-    menu = '''
+    menu = """
         ====== Banco do Claudino ======
         Escolha uma das opções:
         [d] - Depositar
@@ -254,8 +270,7 @@ def menu():
         [c] - Criar conta corrente
         [lc] - Listar Contas
         [q] - Sair
-    
-    => '''
+    => """
     return input(menu)
 
 
@@ -349,9 +364,13 @@ def criar_cliente(clientes):
 
     nome = input("Informe o nome completo: ")
     data_nascimento = input("Informe a data de nascimento (dd-mm-aaaa):")
-    endereco = input("Informe o endereço (logradouro, nro - bairro - cidade/sigla estado): ")
+    endereco = input(
+        "Informe o endereço (logradouro, nro - bairro - cidade/sigla estado): "
+    )
 
-    cliente = PessoaFisica(cpf=cpf, nome=nome, data_nascimento=data_nascimento, endereco=endereco)
+    cliente = PessoaFisica(
+        cpf=cpf, nome=nome, data_nascimento=data_nascimento, endereco=endereco
+    )
 
     clientes.append(cliente)
 
@@ -383,32 +402,32 @@ def listar_contas(contas):
 def main():
     clientes = list()
     contas = list()
-    opcao = ''
+    opcao = ""
 
-    while opcao != 'q':
+    while opcao != "q":
 
         opcao = menu()
 
-        if opcao == 'd':
+        if opcao == "d":
             depositar(clientes)
 
-        elif opcao == 's':
+        elif opcao == "s":
             sacar(clientes)
 
-        elif opcao == 'e':
+        elif opcao == "e":
             exibir_extrato(clientes)
 
-        elif opcao == 'u':
+        elif opcao == "u":
             criar_cliente(clientes)
 
-        elif opcao == 'c':
+        elif opcao == "c":
             numero_conta = len(contas) + 1
             criar_conta(numero_conta, clientes, contas)
 
-        elif opcao == 'lc':
+        elif opcao == "lc":
             listar_contas(contas)
 
-        elif opcao == 'q':
+        elif opcao == "q":
             print("Saindo do sistema...")
 
         else:
